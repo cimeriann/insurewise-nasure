@@ -4,12 +4,14 @@ import { GroupSavings } from '@/models/GroupSavings';
 import { Wallet } from '@/models/Wallet';
 import { Transaction } from '@/models/Transaction';
 import { logger } from '@/config/logger';
-import { AuthRequest } from '@/types';
+import { AuthenticatedRequest } from '@/types';
+import { Types } from 'mongoose';
+
 
 /**
  * Create a new group savings
  */
-export const createGroupSavings = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createGroupSavings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -31,7 +33,7 @@ export const createGroupSavings = async (req: AuthRequest, res: Response): Promi
       rules,
     } = req.body;
 
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.id);
 
     // Create group savings
     const groupSavings = new GroupSavings({
@@ -51,6 +53,8 @@ export const createGroupSavings = async (req: AuthRequest, res: Response): Promi
       nextContributionDate: new Date(startDate),
       nextPayoutDate: new Date(startDate),
     });
+
+   
 
     // Add creator as first member
     await groupSavings.addMember(userId);
@@ -84,7 +88,7 @@ export const createGroupSavings = async (req: AuthRequest, res: Response): Promi
       },
     });
   } catch (error) {
-    logger.error('Error creating group savings', { error, userId: req.user?.userId });
+    logger.error('Error creating group savings', { error, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -95,9 +99,9 @@ export const createGroupSavings = async (req: AuthRequest, res: Response): Promi
 /**
  * Get user's group savings
  */
-export const getUserGroupSavings = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getUserGroupSavings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.id);
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const status = req.query.status as string;
@@ -163,7 +167,7 @@ export const getUserGroupSavings = async (req: AuthRequest, res: Response): Prom
       },
     });
   } catch (error) {
-    logger.error('Error fetching user group savings', { error, userId: req.user?.userId });
+    logger.error('Error fetching user group savings', { error, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -174,10 +178,10 @@ export const getUserGroupSavings = async (req: AuthRequest, res: Response): Prom
 /**
  * Get group savings details
  */
-export const getGroupSavingsById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getGroupSavingsById = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { groupId } = req.params;
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.id);
 
     const groupSavings = await GroupSavings.findById(groupId)
       .populate('creator', 'firstName lastName email phone')
@@ -239,7 +243,7 @@ export const getGroupSavingsById = async (req: AuthRequest, res: Response): Prom
       },
     });
   } catch (error) {
-    logger.error('Error fetching group savings details', { error, groupId: req.params.groupId, userId: req.user?.userId });
+    logger.error('Error fetching group savings details', { error, groupId: req.params.groupId, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -250,10 +254,10 @@ export const getGroupSavingsById = async (req: AuthRequest, res: Response): Prom
 /**
  * Join a group savings
  */
-export const joinGroupSavings = async (req: AuthRequest, res: Response): Promise<void> => {
+export const joinGroupSavings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { groupId } = req.params;
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.id);
 
     const groupSavings = await GroupSavings.findById(groupId);
 
@@ -298,7 +302,7 @@ export const joinGroupSavings = async (req: AuthRequest, res: Response): Promise
       },
     });
   } catch (error) {
-    logger.error('Error joining group savings', { error, groupId: req.params.groupId, userId: req.user?.userId });
+    logger.error('Error joining group savings', { error, groupId: req.params.groupId, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -309,10 +313,10 @@ export const joinGroupSavings = async (req: AuthRequest, res: Response): Promise
 /**
  * Leave a group savings
  */
-export const leaveGroupSavings = async (req: AuthRequest, res: Response): Promise<void> => {
+export const leaveGroupSavings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { groupId } = req.params;
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.id);
 
     const groupSavings = await GroupSavings.findById(groupId);
 
@@ -345,7 +349,7 @@ export const leaveGroupSavings = async (req: AuthRequest, res: Response): Promis
       message: 'Successfully left the group',
     });
   } catch (error) {
-    logger.error('Error leaving group savings', { error, groupId: req.params.groupId, userId: req.user?.userId });
+    logger.error('Error leaving group savings', { error, groupId: req.params.groupId, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -356,10 +360,10 @@ export const leaveGroupSavings = async (req: AuthRequest, res: Response): Promis
 /**
  * Make a contribution to group savings
  */
-export const makeContribution = async (req: AuthRequest, res: Response): Promise<void> => {
+export const makeContribution = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { groupId } = req.params;
-    const userId = req.user!.userId;
+    const userId = new Types.ObjectId(req.user!.id);
 
     const groupSavings = await GroupSavings.findById(groupId);
 
@@ -512,7 +516,7 @@ export const makeContribution = async (req: AuthRequest, res: Response): Promise
       },
     });
   } catch (error) {
-    logger.error('Error making group contribution', { error, groupId: req.params.groupId, userId: req.user?.userId });
+    logger.error('Error making group contribution', { error, groupId: req.params.groupId, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -523,10 +527,10 @@ export const makeContribution = async (req: AuthRequest, res: Response): Promise
 /**
  * Start a group savings (for creator only)
  */
-export const startGroupSavings = async (req: AuthRequest, res: Response): Promise<void> => {
+export const startGroupSavings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { groupId } = req.params;
-    const userId = req.user!.userId;
+    const userId = req.user!.id;
 
     const groupSavings = await GroupSavings.findById(groupId);
 
@@ -585,7 +589,7 @@ export const startGroupSavings = async (req: AuthRequest, res: Response): Promis
       },
     });
   } catch (error) {
-    logger.error('Error starting group savings', { error, groupId: req.params.groupId, userId: req.user?.userId });
+    logger.error('Error starting group savings', { error, groupId: req.params.groupId, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -596,9 +600,9 @@ export const startGroupSavings = async (req: AuthRequest, res: Response): Promis
 /**
  * Get group savings statistics
  */
-export const getGroupSavingsStatistics = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getGroupSavingsStatistics = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user!.userId;
+    const userId = req.user!.id;
 
     const [
       totalGroups,
@@ -636,7 +640,7 @@ export const getGroupSavingsStatistics = async (req: AuthRequest, res: Response)
       },
     });
   } catch (error) {
-    logger.error('Error fetching group savings statistics', { error, userId: req.user?.userId });
+    logger.error('Error fetching group savings statistics', { error, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -647,9 +651,9 @@ export const getGroupSavingsStatistics = async (req: AuthRequest, res: Response)
 /**
  * Get available groups to join
  */
-export const getAvailableGroups = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAvailableGroups = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user!.userId;
+    const userId = req.user!.id;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
@@ -698,7 +702,7 @@ export const getAvailableGroups = async (req: AuthRequest, res: Response): Promi
       },
     });
   } catch (error) {
-    logger.error('Error fetching available groups', { error, userId: req.user?.userId });
+    logger.error('Error fetching available groups', { error, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
