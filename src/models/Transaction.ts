@@ -1,25 +1,34 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema,Types, model, Document } from 'mongoose';
 import { ITransaction } from '@/types';
 
-export interface ITransactionDocument extends ITransaction, Document {
+export interface ITransactionDocument extends ITransaction, Document<Types.ObjectId> {
+  _id: Types.ObjectId;
+}
+
+/* export interface ITransactionDocument extends ITransaction, Document {
   isSuccessful(): boolean;
   isPending(): boolean;
   isFailed(): boolean;
   markAsSuccessful(): Promise<void>;
   markAsFailed(reason?: string): Promise<void>;
-}
+} */
 
 const transactionSchema = new Schema<ITransactionDocument>({
+  user: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
+   },
   walletId: {
     type: Schema.Types.ObjectId,
     ref: 'Wallet',
     required: [true, 'Wallet ID is required'],
   },
-  userId: {
+  /* userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'User ID is required'],
-  },
+  }, */
   type: {
     type: String,
     required: [true, 'Transaction type is required'],
@@ -54,6 +63,11 @@ const transactionSchema = new Schema<ITransactionDocument>({
     required: true,
     enum: ['pending', 'successful', 'failed', 'cancelled'],
     default: 'pending',
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: ['wallet_funding', 'wallet_withdrawal']
   },
   paymentMethod: {
     type: String,

@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 // User related types
 export interface IUser {
@@ -34,7 +34,8 @@ export interface IWallet {
 }
 
 export interface ITransaction {
-  _id: Types.ObjectId;
+  /* _id: Types.ObjectId; */
+  user:mongoose.Types.ObjectId;
   walletId: Types.ObjectId;
   userId: Types.ObjectId;
   type: 'credit' | 'debit';
@@ -43,6 +44,7 @@ export interface ITransaction {
   description: string;
   reference: string;
   status: 'pending' | 'successful' | 'failed' | 'cancelled';
+  category: 'wallet_funding' | 'wallet_withdrawal' | string;
   paymentMethod?: 'paystack' | 'bank_transfer' | 'card' | 'ussd';
   metadata?: Record<string, any>;
   createdAt: Date;
