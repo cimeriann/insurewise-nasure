@@ -6,6 +6,7 @@ import { Transaction } from '@/models/Transaction';
 import { logger } from '@/config/logger';
 import { AuthenticatedRequest } from '@/types';
 import { Types } from 'mongoose';
+import { IndividualContribution } from '@/models/IndividualContibution';
 
 
 /**
@@ -450,9 +451,18 @@ export const makeContribution = async (req: AuthenticatedRequest, res: Response)
     await wallet.debit(groupSavings.contributionAmount, `Group contribution - ${groupSavings.name}`);
     await transaction.save();
 
-    // Record contribution
+    // Record group contribution
     const contribution = await groupSavings.recordContribution(userId, groupSavings.contributionAmount, transaction._id);
 
+    // Recording individual contribution
+    await IndividualContribution.create({
+      user: userId,
+      amount: groupSavings.contributionAmount,
+      source: 'group_savings',
+      groupId: groupSavings._id,
+      transactionId: transaction._id,
+      contributionDate: new Date(),
+    });
     if (!contribution) {
       res.status(500).json({
         success: false,

@@ -3,15 +3,12 @@ import { ITransaction } from '@/types';
 
 export interface ITransactionDocument extends ITransaction, Document<Types.ObjectId> {
   _id: Types.ObjectId;
-}
-
-/* export interface ITransactionDocument extends ITransaction, Document {
   isSuccessful(): boolean;
   isPending(): boolean;
   isFailed(): boolean;
   markAsSuccessful(): Promise<void>;
   markAsFailed(reason?: string): Promise<void>;
-} */
+} 
 
 const transactionSchema = new Schema<ITransactionDocument>({
   user: { 

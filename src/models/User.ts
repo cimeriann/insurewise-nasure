@@ -1,8 +1,9 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { IUser } from '@/types';
 
-export interface IUserDocument extends IUser, Document {
+export interface IUserDocument extends IUser, Document<Types.ObjectId> {
+  _id: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateDisplayName(): string;
   isPasswordExpired(): boolean;
@@ -85,12 +86,12 @@ const userSchema = new Schema<IUserDocument>({
 }, {
   timestamps: true,
   toJSON: {
-    transform: function(doc, ret) {
-      delete ret.password;
-      delete ret.__v;
-      return ret;
-    },
+  transform: function (doc, ret: Partial<IUserDocument & { __v?: number }>) {
+    delete ret.password;
+    delete ret.__v;
+    return ret;
   },
+}
 });
 
 // Indexes for better query performance

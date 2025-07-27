@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { IUser } from './User';
-import { ITransaction } from './Transaction';
+import { IUser } from '@/types';
+import { ITransaction } from '@/types';
 
 export interface IGroupMember {
   user: mongoose.Types.ObjectId | IUser;
@@ -264,7 +264,7 @@ GroupSavingsSchema.pre('save', function(next) {
 GroupSavingsSchema.methods.addMember = async function(userId: mongoose.Types.ObjectId): Promise<boolean> {
   try {
     // Check if user is already a member
-    const existingMember = this.members.find(m => m.user.toString() === userId.toString());
+    const existingMember = this.members.find((m:IGroupMember) => m.user.toString() === userId.toString());
     if (existingMember) {
       return false;
     }
@@ -280,7 +280,7 @@ GroupSavingsSchema.methods.addMember = async function(userId: mongoose.Types.Obj
     }
 
     // Add member with next position
-    const position = Math.max(...this.members.map(m => m.position), 0) + 1;
+    const position = Math.max(...this.members.map((m: IGroupMember) => m.position), 0) + 1;
     
     this.members.push({
       user: userId,
@@ -299,7 +299,7 @@ GroupSavingsSchema.methods.addMember = async function(userId: mongoose.Types.Obj
 
 GroupSavingsSchema.methods.removeMember = async function(userId: mongoose.Types.ObjectId): Promise<boolean> {
   try {
-    const memberIndex = this.members.findIndex(m => m.user.toString() === userId.toString());
+    const memberIndex = this.members.findIndex((m: IGroupMember) => m.user.toString() === userId.toString());
     if (memberIndex === -1) {
       return false;
     }
@@ -313,7 +313,7 @@ GroupSavingsSchema.methods.removeMember = async function(userId: mongoose.Types.
     
     // Reorder positions if in draft
     if (this.status === 'draft') {
-      this.members.forEach((member, index) => {
+      this.members.forEach((member:IGroupMember, index:number) => {
         member.position = index + 1;
       });
     }
@@ -335,7 +335,7 @@ GroupSavingsSchema.methods.recordContribution = async function(
       throw new Error('Contribution amount must match group requirement');
     }
 
-    const member = this.members.find(m => m.user.toString() === memberId.toString());
+    const member = this.members.find((m:IGroupMember) => m.user.toString() === memberId.toString());
     if (!member || !member.isActive) {
       throw new Error('Member not found or inactive');
     }
@@ -376,10 +376,10 @@ GroupSavingsSchema.methods.processPayout = async function(): Promise<boolean> {
       return false;
     }
 
-    const payoutAmount = this.contributionAmount * this.members.filter(m => m.isActive).length;
+    const payoutAmount = this.contributionAmount * this.members.filter((m : IGroupMember)=> m.isActive).length;
     
     // Update recipient
-    const recipientMember = this.members.find(m => m.user.toString() === recipient.toString());
+    const recipientMember = this.members.find((m: IGroupMember) => m.user.toString() === recipient.toString());
     if (recipientMember) {
       recipientMember.receivedPayout = new Date();
     }
@@ -392,7 +392,7 @@ GroupSavingsSchema.methods.processPayout = async function(): Promise<boolean> {
     this.updateContributionSchedule();
 
     // Check if group is completed
-    const allMembersReceived = this.members.every(m => m.receivedPayout);
+    const allMembersReceived = this.members.every((m:IGroupMember) => m.receivedPayout);
     if (allMembersReceived) {
       this.status = 'completed';
     }
@@ -407,28 +407,28 @@ GroupSavingsSchema.methods.processPayout = async function(): Promise<boolean> {
 GroupSavingsSchema.methods.calculateNextRecipient = function(): mongoose.Types.ObjectId | null {
   // Find member with lowest position who hasn't received payout
   const eligibleMembers = this.members
-    .filter(m => m.isActive && !m.receivedPayout)
-    .sort((a, b) => a.position - b.position);
+    .filter((m: IGroupMember) => m.isActive && !m.receivedPayout)
+    .sort((a: { position: number; }, b: { position: number; }) => a.position - b.position);
   
   return eligibleMembers.length > 0 ? eligibleMembers[0].user as mongoose.Types.ObjectId : null;
 };
 
 GroupSavingsSchema.methods.isReadyForPayout = function(): boolean {
-  const activeMembers = this.members.filter(m => m.isActive);
+  const activeMembers = this.members.filter((m: IGroupMember) => m.isActive);
   const currentCycleContributions = this.contributions.filter(
-    c => c.cycle === this.currentCycle && c.status === 'paid'
+    (c:IContribution) => c.cycle === this.currentCycle && c.status === 'paid'
   );
   
   return currentCycleContributions.length === activeMembers.length;
 };
 
 GroupSavingsSchema.methods.getMemberPosition = function(userId: mongoose.Types.ObjectId): number {
-  const member = this.members.find(m => m.user.toString() === userId.toString());
+  const member = this.members.find((m:IGroupMember) => m.user.toString() === userId.toString());
   return member ? member.position : -1;
 };
 
 GroupSavingsSchema.methods.getMemberContributions = function(userId: mongoose.Types.ObjectId): IContribution[] {
-  return this.contributions.filter(c => c.member.toString() === userId.toString());
+  return this.contributions.filter((c:IContribution) => c.member.toString() === userId.toString());
 };
 
 GroupSavingsSchema.methods.canMemberJoin = function(): boolean {
@@ -450,12 +450,12 @@ GroupSavingsSchema.methods.updateContributionSchedule = function(): void {
 GroupSavingsSchema.methods.getOverdueContributions = function(): IContribution[] {
   const now = new Date();
   return this.contributions.filter(
-    c => c.status === 'pending' && c.dueDate < now
-  ).map(c => ({ ...c, status: 'overdue' as const }));
+    (c:IContribution) => c.status === 'pending' && c.dueDate < now
+  ).map((c:IContribution) => ({ ...c, status: 'overdue' as const }));
 };
 
 GroupSavingsSchema.methods.getMemberStats = function(userId: mongoose.Types.ObjectId) {
-  const member = this.members.find(m => m.user.toString() === userId.toString());
+  const member = this.members.find((m:IGroupMember) => m.user.toString() === userId.toString());
   const memberContributions = this.getMemberContributions(userId);
   
   if (!member) {
@@ -468,8 +468,8 @@ GroupSavingsSchema.methods.getMemberStats = function(userId: mongoose.Types.Obje
   }
 
   const totalContributed = memberContributions
-    .filter(c => c.status === 'paid')
-    .reduce((sum, c) => sum + c.amount, 0);
+    .filter((c:IContribution) => c.status === 'paid')
+    .reduce((sum:number, c:IContribution) => sum + c.amount, 0);
 
   return {
     totalContributed,
