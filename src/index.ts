@@ -18,6 +18,7 @@ import walletRoutes from '@/routes/wallet.routes';
 import claimRoutes from '@/routes/claim.routes';
 import groupRoutes from '@/routes/group.routes';
 import paymentRoutes from '@/routes/payment.routes';
+import individualContributionRoutes from '@/routes/individualContribution.routes'
 
 // Load environment variables
 dotenv.config();
@@ -75,6 +76,7 @@ apiRouter.use('/wallet', walletRoutes);
 apiRouter.use('/claims', claimRoutes);
 apiRouter.use('/groups', groupRoutes);
 apiRouter.use('/payments', paymentRoutes);
+apiRouter.use('/individualContribution', individualContributionRoutes)
 
 app.use(`${API_PREFIX}/${API_VERSION}`, apiRouter);
 

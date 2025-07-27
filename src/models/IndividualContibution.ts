@@ -30,6 +30,12 @@ const IndividualContributionSchema = new Schema<IIndividualContribution>({
     type: Date,
     default: Date.now,
   },
+  contributionType:{
+    type: String,
+    enum:['weekly', 'monthly'],
+    default: 'weekly',
+    required:true,
+  },
   status: {
     type: String,
     enum: ['pending', 'paid', 'failed'],

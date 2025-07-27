@@ -191,6 +191,7 @@ export interface IIndividualContribution extends Document {
   currency: string;
   transactionId?: Types.ObjectId;
   contributionDate: Date;
+  contributionType: 'weekly'|'monthly'
   status: 'pending' | 'paid' | 'failed';
   source:'individual'|'group';
   groupId: Types.ObjectId;
