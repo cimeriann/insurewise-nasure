@@ -10,6 +10,15 @@ export interface ITransactionDocument extends ITransaction, Document<Types.Objec
   markAsFailed(reason?: string): Promise<void>;
 } 
 
+export interface ITransactionModel extends mongoose.Model<ITransactionDocument> {
+  getTransactionSummary(
+    userId: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<any[]>;
+}
+
+
 const transactionSchema = new Schema<ITransactionDocument>({
   user: { 
     type: Schema.Types.ObjectId, 
@@ -235,5 +244,5 @@ transactionSchema.virtual('ageInDays').get(function() {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
-export const Transaction = mongoose.model<ITransactionDocument>('Transaction', transactionSchema);
+export const Transaction = mongoose.model<ITransactionDocument, ITransactionModel>('Transaction', transactionSchema);
 export default Transaction;
