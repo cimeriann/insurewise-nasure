@@ -128,6 +128,13 @@ claimSchema.index({ createdAt: -1 });
 claimSchema.index({ userId: 1, status: 1 });
 claimSchema.index({ status: 1, createdAt: -1 });
 
+claimSchema.virtual('ageInDays').get(function (this: any) {
+  if (!this.createdAt) return undefined;
+  const created = new Date(this.createdAt);
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
+});
 // Instance methods
 claimSchema.methods.canBeReviewed = function(): boolean {
   return this.status === 'pending';

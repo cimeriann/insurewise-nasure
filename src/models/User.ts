@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { IUser } from '@/types';
 
-export interface IUserDocument extends IUser, Document {
+export interface IUserDocument extends Omit<IUser, '_id'>, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateDisplayName(): string;
   isPasswordExpired(): boolean;
@@ -85,9 +85,9 @@ const userSchema = new Schema<IUserDocument>({
 }, {
   timestamps: true,
   toJSON: {
-    transform: function(doc, ret) {
-      delete ret.password;
-      delete ret.__v;
+    transform: function(doc, ret: any) {
+      delete ret?.password;
+      delete ret?.__v;
       return ret;
     },
   },
