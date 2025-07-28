@@ -5,7 +5,12 @@ import { Transaction } from '@/models/Transaction';
 import { User } from '@/models/User';
 import { catchAsync, AppError } from '@/middleware/errorHandler';
 import { logger } from '@/config/logger';
-import { AuthenticatedRequest, ApiResponse } from '@/types';
+import { AuthenticatedRequest, ApiResponse, ITransaction } from '@/types';
+
+export interface ITransactionWithVirtuals extends ITransaction {
+  formattedAmount: string;
+  ageInDays: number;
+}
 
 /**
  * Get wallet balance and basic info
@@ -341,17 +346,22 @@ export const getTransactionById = catchAsync(async (req: AuthenticatedRequest, r
     return next(new AppError('Transaction not found', 404));
   }
 
-  const response: ApiResponse = {
-    status: 'success',
-    message: 'Transaction retrieved successfully',
-    data: {
-      transaction: {
-        ...transaction.toJSON(),
-        formattedAmount: transaction.formattedAmount,
-        ageInDays: transaction.ageInDays,
-      },
+  const transactionObj = transaction.toObject({ virtuals: true }) as unknown as ITransactionWithVirtuals;
+
+const response: ApiResponse = {
+  status: 'success',
+  message: 'Transaction retrieved successfully',
+  data: {
+    transaction: {
+      ...transactionObj,
+      formattedAmount: transactionObj.formattedAmount,
+      ageInDays: transactionObj.ageInDays,
     },
-  };
+  },
+};
+
+
+
 
   res.status(200).json(response);
 });

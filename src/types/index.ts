@@ -1,9 +1,9 @@
 import { Request } from 'express';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 // User related types
 export interface IUser {
-  _id: Types.ObjectId;
+ /*  _id: Types.ObjectId; */
   email: string;
   password: string;
   firstName: string;
@@ -23,7 +23,7 @@ export interface IUser {
 
 // Wallet related types
 export interface IWallet {
-  _id: Types.ObjectId;
+  /* _id: Types.ObjectId; */
   userId: Types.ObjectId;
   balance: number;
   currency: string;
@@ -31,10 +31,12 @@ export interface IWallet {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  formattedBalance?: string;
 }
 
 export interface ITransaction {
-  _id: Types.ObjectId;
+  /* _id: Types.ObjectId; */
+  user:mongoose.Types.ObjectId;
   walletId: Types.ObjectId;
   userId: Types.ObjectId;
   type: 'credit' | 'debit';
@@ -43,6 +45,7 @@ export interface ITransaction {
   description: string;
   reference: string;
   status: 'pending' | 'successful' | 'failed' | 'cancelled';
+  category: 'wallet_funding' | 'wallet_withdrawal' | string;
   paymentMethod?: 'paystack' | 'bank_transfer' | 'card' | 'ussd';
   metadata?: Record<string, any>;
   createdAt: Date;
@@ -180,6 +183,19 @@ export interface IPayment {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IIndividualContribution extends Document {
+  userId: Types.ObjectId;
+  savingsPlanId: Types.ObjectId; // Reference to ISavingsPlan
+  amount: number;
+  currency: string;
+  transactionId?: Types.ObjectId;
+  contributionDate: Date;
+  status: 'pending' | 'paid' | 'failed';
+  source:'individual'|'group';
+  groupId: Types.ObjectId;
+}
+
 
 // Authentication related types
 export interface AuthenticatedRequest extends Request {

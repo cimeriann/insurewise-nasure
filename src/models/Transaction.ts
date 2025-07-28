@@ -1,25 +1,40 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema,Types, model, Document } from 'mongoose';
 import { ITransaction } from '@/types';
 
-export interface ITransactionDocument extends ITransaction, Document {
+export interface ITransactionDocument extends ITransaction, Document<Types.ObjectId> {
+  _id: Types.ObjectId;
   isSuccessful(): boolean;
   isPending(): boolean;
   isFailed(): boolean;
   markAsSuccessful(): Promise<void>;
   markAsFailed(reason?: string): Promise<void>;
+} 
+
+export interface ITransactionModel extends mongoose.Model<ITransactionDocument> {
+  getTransactionSummary(
+    userId: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<any[]>;
 }
 
+
 const transactionSchema = new Schema<ITransactionDocument>({
+  user: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
+   },
   walletId: {
     type: Schema.Types.ObjectId,
     ref: 'Wallet',
     required: [true, 'Wallet ID is required'],
   },
-  userId: {
+  /* userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'User ID is required'],
-  },
+  }, */
   type: {
     type: String,
     required: [true, 'Transaction type is required'],
@@ -54,6 +69,11 @@ const transactionSchema = new Schema<ITransactionDocument>({
     required: true,
     enum: ['pending', 'successful', 'failed', 'cancelled'],
     default: 'pending',
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: ['wallet_funding', 'wallet_withdrawal']
   },
   paymentMethod: {
     type: String,
@@ -224,5 +244,5 @@ transactionSchema.virtual('ageInDays').get(function() {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
-export const Transaction = mongoose.model<ITransactionDocument>('Transaction', transactionSchema);
+export const Transaction = mongoose.model<ITransactionDocument, ITransactionModel>('Transaction', transactionSchema);
 export default Transaction;

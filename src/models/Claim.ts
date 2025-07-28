@@ -1,5 +1,18 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import { IClaim } from '@/types';
+
+export interface IClaimModel extends Model<IClaimDocument> {
+  findByUser(
+    userId: string | Types.ObjectId,
+    page?: number,
+    limit?: number,
+    status?: string
+  ): Promise<IClaimDocument[]>;
+
+  getPendingClaims(page?: number, limit?: number): Promise<IClaimDocument[]>;
+
+  getClaimStats(userId?: string): Promise<any>;
+}
 
 export interface IClaimDocument extends Omit<IClaim, '_id'>, Document {
   canBeReviewed(): boolean;
@@ -8,6 +21,9 @@ export interface IClaimDocument extends Omit<IClaim, '_id'>, Document {
   markAsUnderReview(reviewerId: string): Promise<void>;
   approve(reviewerId: string, approvedAmount?: number, notes?: string): Promise<void>;
   decline(reviewerId: string, notes: string): Promise<void>;
+  formattedAmount:string;
+  formattedApprovedAmount?: string|null;
+  ageInDays: number;
 }
 
 const claimSchema = new Schema<IClaimDocument>({
@@ -260,5 +276,5 @@ claimSchema.virtual('ageInDays').get(function() {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
-export const Claim = mongoose.model<IClaimDocument>('Claim', claimSchema);
+export const Claim = mongoose.model<IClaimDocument, IClaimModel>('Claim', claimSchema);
 export default Claim;

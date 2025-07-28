@@ -327,7 +327,7 @@ export const changePassword = catchAsync(
  * Request password reset (placeholder for future implementation)
  */
 export const requestPasswordReset = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<Response<any, Record<string, any>>> => {
     const { email } = req.body;
 
     const user = await User.findOne({ email: email.toLowerCase() });
@@ -354,6 +354,6 @@ export const requestPasswordReset = catchAsync(
         "If an account with that email exists, a password reset link has been sent",
     };
 
-    res.status(200).json(response);
+    return res.status(200).json(response);
   }
 );

@@ -1,7 +1,8 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import { IWallet } from '@/types';
 
-export interface IWalletDocument extends IWallet, Document {
+export interface IWalletDocument extends IWallet, Document<Types.ObjectId> {
+  _id: Types.ObjectId;
   credit(amount: number, description: string, reference?: string): Promise<void>;
   debit(amount: number, description: string, reference?: string): Promise<boolean>;
   getBalance(): number;
@@ -39,11 +40,13 @@ const walletSchema = new Schema<IWalletDocument>({
 }, {
   timestamps: true,
   toJSON: {
-    transform: function(doc, ret) {
+  transform: function (doc, ret: Partial<IWalletDocument & { __v?: number }>) {
+    if ('__v' in ret) {
       delete ret.__v;
-      return ret;
-    },
+    }
+    return ret;
   },
+}
 });
 
 // Indexes for better query performance

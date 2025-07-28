@@ -4,7 +4,7 @@ import { Wallet } from '@/models/Wallet';
 import { Transaction } from '@/models/Transaction';
 import { User } from '@/models/User';
 import { logger } from '@/config/logger';
-import { AuthRequest } from '@/types';
+import { AuthenticatedRequest } from '@/types';
 import crypto from 'crypto';
 
 // Paystack configuration
@@ -81,7 +81,7 @@ interface PaystackVerifyResponse {
 /**
  * Initialize Paystack payment
  */
-export const initializePayment = async (req: AuthRequest, res: Response): Promise<void> => {
+export const initializePayment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -94,7 +94,7 @@ export const initializePayment = async (req: AuthRequest, res: Response): Promis
     }
 
     const { amount, email, metadata } = req.body;
-    const userId = req.user!.userId;
+    const userId = req.user!.id;
 
     // Get user details
     const user = await User.findById(userId);
@@ -161,7 +161,7 @@ export const initializePayment = async (req: AuthRequest, res: Response): Promis
       },
     });
   } catch (error) {
-    logger.error('Error initializing payment', { error, userId: req.user?.userId });
+    logger.error('Error initializing payment', { error, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -172,10 +172,10 @@ export const initializePayment = async (req: AuthRequest, res: Response): Promis
 /**
  * Verify Paystack payment
  */
-export const verifyPayment = async (req: AuthRequest, res: Response): Promise<void> => {
+export const verifyPayment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { reference } = req.params;
-    const userId = req.user!.userId;
+    const userId = req.user!.id;
 
     // Find the transaction
     const transaction = await Transaction.findOne({ reference, user: userId });
@@ -188,7 +188,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
     }
 
     // Check if already processed
-    if (transaction.status === 'completed') {
+    if (transaction.status === 'successful') {
       res.status(400).json({
         success: false,
         message: 'Transaction already processed',
@@ -269,7 +269,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
       await wallet.credit(transaction.amount, 'Paystack payment verification');
       
       // Update transaction
-      transaction.status = 'completed';
+      transaction.status = 'successful';
       transaction.metadata = {
         ...transaction.metadata,
         paystackData: paystackResponse.data,
@@ -337,7 +337,7 @@ export const verifyPayment = async (req: AuthRequest, res: Response): Promise<vo
       });
     }
   } catch (error) {
-    logger.error('Error verifying payment', { error, reference: req.params.reference, userId: req.user?.userId });
+    logger.error('Error verifying payment', { error, reference: req.params.reference, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -407,7 +407,7 @@ const handleChargeSuccess = async (data: any): Promise<void> => {
       return;
     }
 
-    if (transaction.status === 'completed') {
+    if (transaction.status === 'successful') {
       logger.info('Transaction already processed', { reference });
       return;
     }
@@ -422,7 +422,7 @@ const handleChargeSuccess = async (data: any): Promise<void> => {
     await wallet.credit(amount / 100, 'Paystack webhook - charge success'); // Convert from kobo
 
     // Update transaction
-    transaction.status = 'completed';
+    transaction.status = 'successful';
     transaction.metadata = {
       ...transaction.metadata,
       webhookData: data,
@@ -485,7 +485,7 @@ const handleTransferSuccess = async (data: any): Promise<void> => {
       return;
     }
 
-    transaction.status = 'completed';
+    transaction.status = 'successful';
     transaction.metadata = {
       ...transaction.metadata,
       webhookData: data,
@@ -538,9 +538,9 @@ const handleTransferFailed = async (data: any): Promise<void> => {
 /**
  * Get payment history
  */
-export const getPaymentHistory = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getPaymentHistory = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user!.userId;
+    const userId = req.user!.id;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const type = req.query.type as string;
@@ -594,7 +594,7 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response): Promis
       },
     });
   } catch (error) {
-    logger.error('Error fetching payment history', { error, userId: req.user?.userId });
+    logger.error('Error fetching payment history', { error, userId: req.user?.id });
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -605,7 +605,7 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response): Promis
 /**
  * Get payment configuration
  */
-export const getPaymentConfig = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getPaymentConfig = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     res.json({
       success: true,
