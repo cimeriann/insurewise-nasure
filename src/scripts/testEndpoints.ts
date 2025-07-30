@@ -23,6 +23,13 @@ class APITester {
     console.log(colors.blue('🚀 Starting API Endpoint Tests\n'));
 
     try {
+      // Test connectivity first
+      const isConnected = await this.testConnectivity();
+      if (!isConnected) {
+        console.log(colors.red('\n❌ Aborting tests - server not reachable'));
+        return;
+      }
+
       // Test authentication first
       await this.testAuthentication();
       
@@ -33,11 +40,29 @@ class APITester {
         await this.testClaimsEndpoints();
         await this.testGroupSavingsEndpoints();
         await this.testPaymentEndpoints();
+      } else {
+        console.log(colors.yellow('⚠️  Skipping other tests - authentication failed'));
       }
 
       this.printSummary();
     } catch (error) {
       console.error(colors.red('❌ Test suite failed:'), error);
+    }
+  }
+
+  private async testConnectivity() {
+    console.log(colors.yellow('🔌 Testing Server Connectivity'));
+    
+    try {
+      const response = await axios.get(`${BASE_URL.replace('/api/v1', '')}/health`, {
+        timeout: 5000
+      });
+      console.log(colors.green('✅ Server is reachable'));
+      return true;
+    } catch (error) {
+      console.log(colors.red('❌ Cannot connect to server'));
+      console.log(colors.red(`   Make sure your server is running on ${BASE_URL.replace('/api/v1', '')}`));
+      return false;
     }
   }
 
