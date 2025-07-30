@@ -6,7 +6,7 @@ import { Transaction } from '@/models/Transaction';
 import { logger } from '@/config/logger';
 import { AuthenticatedRequest } from '@/types';
 import { Types } from 'mongoose';
-import { IndividualContribution } from '@/models/IndividualContibution';
+import SavingsPlan from '@/models/SavingsPlan';
 
 
 /**
@@ -455,7 +455,7 @@ export const makeContribution = async (req: AuthenticatedRequest, res: Response)
     const contribution = await groupSavings.recordContribution(userId, groupSavings.contributionAmount, transaction._id);
 
     // Recording individual contribution
-    await IndividualContribution.create({
+    await SavingsPlan.create({
       user: userId,
       amount: groupSavings.contributionAmount,
       source: 'group_savings',

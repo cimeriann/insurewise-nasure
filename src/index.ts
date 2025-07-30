@@ -42,10 +42,10 @@ const limiter = rateLimit({
 // app.use(helmet()); // Security headers
 app.use(compression()); // Compress responses
 app.use(limiter); // Rate limiting
-app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
-  credentials: true,
-}));
+// app.use(cors({
+//   origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+//   credentials: true,
+// }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -67,16 +67,16 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-const apiRouter = express.Router();
+// const apiRouter = express.Router();
 
-apiRouter.use('/auth', authRouter);
-apiRouter.use('/users', userRoutes);
-apiRouter.use('/wallet', walletRoutes);
-apiRouter.use('/claims', claimRoutes);
-apiRouter.use('/groups', groupRoutes);
-apiRouter.use('/payments', paymentRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/auth`, authRouter);
+app.use('/users', userRoutes);
+app.use('/wallet', walletRoutes);
+app.use('/claims', claimRoutes);
+app.use('/groups', groupRoutes);
+app.use('/payments', paymentRoutes);
 
-app.use(`${API_PREFIX}/${API_VERSION}`, apiRouter);
+// app.use(`${API_PREFIX}/${API_VERSION}`, apiRouter);
 
 // Error handling middleware (must be last)
 app.use(notFoundHandler);
