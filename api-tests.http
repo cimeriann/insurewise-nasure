@@ -1,0 +1,261 @@
+### Variables
+@baseUrl = http://localhost:3000/api/v1
+@userToken = 
+@adminToken = 
+
+### ================================
+### AUTHENTICATION ENDPOINTS
+### ================================
+
+### 1. Register New User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "password123",
+  "firstName": "Test",
+  "lastName": "User",
+  "phoneNumber": "+2348099999999",
+  "dateOfBirth": "1995-06-15",
+  "address": "123 Test Street, Lagos"
+}
+
+### 2. Login with Demo User
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "password123"
+}
+
+### 3. Login with Admin User
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@insurewise.com",
+  "password": "password123"
+}
+
+### 4. Get Current User Profile
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{userToken}}
+
+### 5. Refresh Token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "your_refresh_token_here"
+}
+
+### 6. Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{userToken}}
+
+### ================================
+### USER ENDPOINTS
+### ================================
+
+### 7. Get All Users (Admin Only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{adminToken}}
+
+### 8. Get User by ID
+GET {{baseUrl}}/users/user_id_here
+Authorization: Bearer {{userToken}}
+
+### 9. Update User Profile
+PUT {{baseUrl}}/users/user_id_here
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Updated",
+  "lastName": "Name",
+  "address": "Updated address"
+}
+
+### 10. Change Password
+PUT {{baseUrl}}/users/user_id_here/password
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newpassword123"
+}
+
+### ================================
+### WALLET ENDPOINTS
+### ================================
+
+### 11. Get User Wallet
+GET {{baseUrl}}/wallet
+Authorization: Bearer {{userToken}}
+
+### 12. Fund Wallet (Mock Paystack)
+POST {{baseUrl}}/wallet/fund
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 25000,
+  "currency": "NGN",
+  "paymentMethod": "paystack"
+}
+
+### 13. Get Wallet Transactions
+GET {{baseUrl}}/wallet/transactions?page=1&limit=10
+Authorization: Bearer {{userToken}}
+
+### 14. Get Transaction by ID
+GET {{baseUrl}}/wallet/transactions/transaction_id_here
+Authorization: Bearer {{userToken}}
+
+### ================================
+### CLAIMS ENDPOINTS
+### ================================
+
+### 15. Submit New Claim
+POST {{baseUrl}}/claims
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "type": "medical",
+  "title": "Medical Expense Claim",
+  "description": "Hospital bill for emergency treatment",
+  "amount": 75000,
+  "currency": "NGN",
+  "receiptUrl": "https://example.com/receipt.pdf"
+}
+
+### 16. Get User's Claims
+GET {{baseUrl}}/claims?page=1&limit=10&status=pending
+Authorization: Bearer {{userToken}}
+
+### 17. Get Claim by ID
+GET {{baseUrl}}/claims/claim_id_here
+Authorization: Bearer {{userToken}}
+
+### 18. Get All Claims (Admin Only)
+GET {{baseUrl}}/claims/admin/all?page=1&limit=20
+Authorization: Bearer {{adminToken}}
+
+### 19. Update Claim Status (Admin Only)
+PUT {{baseUrl}}/claims/claim_id_here/status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "approved",
+  "reviewNotes": "Claim approved after document verification",
+  "approvedAmount": 70000
+}
+
+### ================================
+### GROUP SAVINGS ENDPOINTS
+### ================================
+
+### 20. Create New Group
+POST {{baseUrl}}/groups
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Savings Group",
+  "description": "A test group for API testing",
+  "contributionAmount": 30000,
+  "currency": "NGN",
+  "maxMembers": 6,
+  "contributionFrequency": "monthly",
+  "totalCycles": 6
+}
+
+### 21. Get All Groups
+GET {{baseUrl}}/groups?page=1&limit=10&status=active
+Authorization: Bearer {{userToken}}
+
+### 22. Get Group by ID
+GET {{baseUrl}}/groups/group_id_here
+Authorization: Bearer {{userToken}}
+
+### 23. Join Group
+POST {{baseUrl}}/groups/group_id_here/join
+Authorization: Bearer {{userToken}}
+
+### 24. Leave Group
+POST {{baseUrl}}/groups/group_id_here/leave
+Authorization: Bearer {{userToken}}
+
+### 25. Make Contribution
+POST {{baseUrl}}/groups/group_id_here/contribute
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 30000
+}
+
+### 26. Get Group Contributions
+GET {{baseUrl}}/groups/group_id_here/contributions
+Authorization: Bearer {{userToken}}
+
+### 27. Update Group (Creator Only)
+PUT {{baseUrl}}/groups/group_id_here
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "description": "Updated group description",
+  "status": "active"
+}
+
+### ================================
+### PAYMENT ENDPOINTS
+### ================================
+
+### 28. Initialize Payment
+POST {{baseUrl}}/payments/initialize
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 50000,
+  "currency": "NGN",
+  "purpose": "wallet_funding",
+  "metadata": {
+    "userId": "user_id_here"
+  }
+}
+
+### 29. Verify Payment
+GET {{baseUrl}}/payments/verify/payment_reference_here
+Authorization: Bearer {{userToken}}
+
+### 30. Get Payment History
+GET {{baseUrl}}/payments/history?page=1&limit=10
+Authorization: Bearer {{userToken}}
+
+### ================================
+### ADMIN-ONLY ENDPOINTS
+### ================================
+
+### 31. Get Dashboard Stats (Admin)
+GET {{baseUrl}}/admin/dashboard
+Authorization: Bearer {{adminToken}}
+
+### 32. Get All Users (Admin)
+GET {{baseUrl}}/admin/users?page=1&limit=20
+Authorization: Bearer {{adminToken}}
+
+### 33. Deactivate User (Admin)
+PUT {{baseUrl}}/admin/users/user_id_here/deactivate
+Authorization: Bearer {{adminToken}}
+
+### 34. Get Pending Claims (Admin)
+GET {{baseUrl}}/admin/claims/pending
+Authorization: Bearer {{adminToken}}
