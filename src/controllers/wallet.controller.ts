@@ -158,21 +158,54 @@ export const fundWallet = catchAsync(async (req: AuthenticatedRequest, res: Resp
   // Mock successful payment (remove this in production)
   setTimeout(async () => {
     try {
-      await wallet.credit(amount, 'Wallet funding', reference);
-      await transaction.markAsSuccessful();
+      // Reload transaction to ensure we have the latest state
+      const currentTransaction = await Transaction.findById(transaction._id);
+      if (!currentTransaction) {
+        logger.error('Transaction not found during funding process', { transactionId: transaction._id });
+        return;
+      }
+
+      // Check if transaction is still pending
+      if (currentTransaction.status !== 'pending') {
+        logger.warn('Transaction is no longer pending', { 
+          transactionId: transaction._id, 
+          currentStatus: currentTransaction.status 
+        });
+        return;
+      }
+
+      // Reload wallet to ensure we have the latest state
+      const currentWallet = await Wallet.findById(wallet._id);
+      if (!currentWallet) {
+        logger.error('Wallet not found during funding process', { walletId: wallet._id });
+        await currentTransaction.markAsFailed('Wallet not found');
+        return;
+      }
+
+      await currentWallet.credit(amount, 'Wallet funding', reference);
+      await currentTransaction.markAsSuccessful();
       
       logger.info('Wallet funded successfully', {
         userId: req.user?.id,
         amount,
         reference,
         paymentMethod,
+        newBalance: currentWallet.balance,
       });
     } catch (error) {
       logger.error('Error processing wallet funding:', error);
-      await transaction.markAsFailed('Processing error');
+      try {
+        const currentTransaction = await Transaction.findById(transaction._id);
+        if (currentTransaction && currentTransaction.canBeUpdated()) {
+          await currentTransaction.markAsFailed('Processing error');
+        }
+      } catch (updateError) {
+        logger.error('Error updating transaction status:', updateError);
+      }
     }
   }, 1000);
 
+  
   const response: ApiResponse = {
     status: 'success',
     message: 'Wallet funding initiated successfully',
