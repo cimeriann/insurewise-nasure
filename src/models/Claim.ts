@@ -21,8 +21,8 @@ export interface IClaimDocument extends Omit<IClaim, '_id'>, Document {
   markAsUnderReview(reviewerId: string): Promise<void>;
   approve(reviewerId: string, approvedAmount?: number, notes?: string): Promise<void>;
   decline(reviewerId: string, notes: string): Promise<void>;
-  formattedAmount:string;
-  formattedApprovedAmount?: string|null;
+  formattedAmount: string;
+  formattedApprovedAmount?: string | null;
   ageInDays: number;
 }
 
@@ -92,6 +92,21 @@ const claimSchema = new Schema<IClaimDocument>({
       min: 0,
       max: 1,
     },
+    risk_score: { // Added this field that seeder uses
+      type: Number,
+      min: 0,
+      max: 1,
+    },
+    categories: [{ // Added this field that seeder uses
+      type: String,
+    }],
+    extracted_amount: { // Added this field that seeder uses
+      type: Number,
+    },
+    verification_status: { // Added this field that seeder uses
+      type: String,
+      enum: ['verified', 'pending', 'failed'],
+    },
     recommendation: {
       type: String,
       enum: ['approve', 'decline', 'manual_review'],
@@ -144,13 +159,6 @@ claimSchema.index({ createdAt: -1 });
 claimSchema.index({ userId: 1, status: 1 });
 claimSchema.index({ status: 1, createdAt: -1 });
 
-claimSchema.virtual('ageInDays').get(function (this: any) {
-  if (!this.createdAt) return undefined;
-  const created = new Date(this.createdAt);
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
-  return diff;
-});
 // Instance methods
 claimSchema.methods.canBeReviewed = function(): boolean {
   return this.status === 'pending';
@@ -269,8 +277,9 @@ claimSchema.virtual('formattedApprovedAmount').get(function() {
   }).format(this.approvedAmount);
 });
 
-// Virtual for claim age
+// Virtual for claim age - REMOVED DUPLICATE, keeping only one
 claimSchema.virtual('ageInDays').get(function() {
+  if (!this.createdAt) return 0;
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - this.createdAt.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
