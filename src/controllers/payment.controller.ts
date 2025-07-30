@@ -412,9 +412,9 @@ const handleChargeSuccess = async (data: any): Promise<void> => {
       return;
     }
 
-    const wallet = await Wallet.findOne({ user: transaction.user });
+    const wallet = await Wallet.findOne({ userId: transaction.userId });
     if (!wallet) {
-      logger.error('Wallet not found for successful charge', { reference, userId: transaction.user });
+      logger.error('Wallet not found for successful charge', { reference, userId: transaction.userId });
       return;
     }
 
@@ -433,7 +433,7 @@ const handleChargeSuccess = async (data: any): Promise<void> => {
     logger.info('Charge success processed', {
       reference,
       amount: amount / 100,
-      userId: transaction.user,
+      userId: transaction.userId,
     });
   } catch (error) {
     logger.error('Error handling charge success', { error, data });
@@ -465,7 +465,7 @@ const handleChargeFailed = async (data: any): Promise<void> => {
     logger.warn('Charge failed processed', {
       reference,
       gateway_response,
-      userId: transaction.user,
+      userId: transaction.userId,
     });
   } catch (error) {
     logger.error('Error handling charge failed', { error, data });
@@ -496,7 +496,7 @@ const handleTransferSuccess = async (data: any): Promise<void> => {
     logger.info('Transfer success processed', {
       reference,
       amount: amount / 100,
-      userId: transaction.user,
+      userId: transaction.userId,
     });
   } catch (error) {
     logger.error('Error handling transfer success', { error, data });
@@ -528,7 +528,7 @@ const handleTransferFailed = async (data: any): Promise<void> => {
     logger.warn('Transfer failed processed', {
       reference,
       gateway_response,
-      userId: transaction.user,
+      userId: transaction.userId,
     });
   } catch (error) {
     logger.error('Error handling transfer failed', { error, data });
