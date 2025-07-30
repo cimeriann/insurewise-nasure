@@ -13,7 +13,7 @@ const userSchema = new Schema<IUserDocument>({
   email: {
     type: String,
     required: [true, 'Email is required'],
-    unique: true,
+    unique: true, // Keep this
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'],
@@ -39,7 +39,7 @@ const userSchema = new Schema<IUserDocument>({
   phoneNumber: {
     type: String,
     required: [true, 'Phone number is required'],
-    unique: true,
+    unique: true, // Keep this
     match: [/^\+?[\d\s-()]{10,}$/, 'Please enter a valid phone number'],
   },
   dateOfBirth: {
@@ -86,17 +86,14 @@ const userSchema = new Schema<IUserDocument>({
 }, {
   timestamps: true,
   toJSON: {
-  transform: function (doc, ret: Partial<IUserDocument & { __v?: number }>) {
-    delete ret.password;
-    delete ret.__v;
-    return ret;
+    transform: function(doc, ret) {
+      const { password, __v, ...rest } = ret;
+      return rest;
+    },
   },
-}
 });
 
 // Indexes for better query performance
-userSchema.index({ email: 1 });
-userSchema.index({ phoneNumber: 1 });
 userSchema.index({ isActive: 1 });
 userSchema.index({ createdAt: -1 });
 

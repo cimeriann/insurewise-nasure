@@ -13,8 +13,8 @@ const walletSchema = new Schema<IWalletDocument>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'User ID is required'],
-    unique: true,
+    required: true,
+    unique: true, // Keep this for field-level uniqueness
   },
   balance: {
     type: Number,
@@ -49,11 +49,6 @@ const walletSchema = new Schema<IWalletDocument>({
 }
 });
 
-// Indexes for better query performance
-walletSchema.index({ userId: 1 });
-walletSchema.index({ isActive: 1 });
-walletSchema.index({ currency: 1 });
-
 // Instance method to credit wallet
 walletSchema.methods.credit = async function(
   amount: number, 
@@ -68,13 +63,14 @@ walletSchema.methods.credit = async function(
   const Transaction = mongoose.model('Transaction');
   const transaction = new Transaction({
     walletId: this._id,
-    userId: this.userId,
+    userId: this.userId, 
     type: 'credit',
     amount,
     currency: this.currency,
     description,
-    reference: reference || `CR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    status: 'successful',
+    reference: reference || `CR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`.toUpperCase(),
+    status: 'successful', 
+    category: 'wallet_funding', 
   });
 
   await transaction.save();
@@ -103,13 +99,14 @@ walletSchema.methods.debit = async function(
   const Transaction = mongoose.model('Transaction');
   const transaction = new Transaction({
     walletId: this._id,
-    userId: this.userId,
+    userId: this.userId, // Fixed: using userId instead of user
     type: 'debit',
     amount,
     currency: this.currency,
     description,
-    reference: reference || `DR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    status: 'successful',
+    reference: reference || `DR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`.toUpperCase(),
+    status: 'successful', // Fixed: using 'successful' instead of 'completed'
+    category: 'other', // Added required category
   });
 
   await transaction.save();

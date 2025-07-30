@@ -35,21 +35,20 @@ export interface IWallet {
 }
 
 export interface ITransaction {
-  /* _id: Types.ObjectId; */
-  user:mongoose.Types.ObjectId;
-  walletId: Types.ObjectId;
   userId: Types.ObjectId;
+  walletId: Types.ObjectId;
   type: 'credit' | 'debit';
   amount: number;
   currency: string;
   description: string;
   reference: string;
   status: 'pending' | 'successful' | 'failed' | 'cancelled';
-  category: 'wallet_funding' | 'wallet_withdrawal' | string;
-  paymentMethod?: 'paystack' | 'bank_transfer' | 'card' | 'ussd';
-  metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
+  category?: 'wallet_funding' | 'premium_payment' | 'claim_payout' | 'group_contribution' | 'cashback' | 'refund' | 'transfer' | 'other';
+  paymentMethod?: 'paystack' | 'flutterwave' | 'bank_transfer' | 'card' | 'wallet' | 'other';
+  metadata?: any;
+  failureReason?: string; // Added this field
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Claims related types
