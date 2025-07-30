@@ -12,6 +12,7 @@ import { AuthenticatedRequest, ApiResponse } from "@/types";
  */
 export const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+	logger.info("Registration Service started")
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

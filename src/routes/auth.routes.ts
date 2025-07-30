@@ -12,7 +12,7 @@ import {
 import { authenticateToken, verifyRefreshToken } from '@/middleware/auth';
 import { validateRequest } from '@/middleware/errorHandler';
 
-const router = Router();
+const authRouter = Router();
 
 // Validation rules
 const registerValidation = [
@@ -87,48 +87,48 @@ const refreshTokenValidation = [
  * @desc    Register a new user
  * @access  Public
  */
-router.post('/register', registerValidation, validateRequest, register);
+authRouter.post('/register', registerValidation, validateRequest, register);
 
 /**
  * @route   POST /api/v1/auth/login
  * @desc    Login user
  * @access  Public
  */
-router.post('/login', loginValidation, validateRequest, login);
+authRouter.post('/login', loginValidation, validateRequest, login);
 
 /**
  * @route   POST /api/v1/auth/refresh
  * @desc    Refresh access token
  * @access  Public (with valid refresh token)
  */
-router.post('/refresh', refreshTokenValidation, validateRequest, verifyRefreshToken, refreshToken);
+authRouter.post('/refresh', refreshTokenValidation, validateRequest, verifyRefreshToken, refreshToken);
 
 /**
  * @route   POST /api/v1/auth/logout
  * @desc    Logout user
  * @access  Private
  */
-router.post('/logout', authenticateToken, logout);
+authRouter.post('/logout', authenticateToken, logout);
 
 /**
  * @route   GET /api/v1/auth/me
  * @desc    Get current user profile
  * @access  Private
  */
-router.get('/me', authenticateToken, getCurrentUser);
+authRouter.get('/me', authenticateToken, getCurrentUser);
 
 /**
  * @route   PUT /api/v1/auth/change-password
  * @desc    Change user password
  * @access  Private
  */
-router.put('/change-password', authenticateToken, changePasswordValidation, validateRequest, changePassword);
+authRouter.put('/change-password', authenticateToken, changePasswordValidation, validateRequest, changePassword);
 
 /**
  * @route   POST /api/v1/auth/request-password-reset
  * @desc    Request password reset
  * @access  Public
  */
-router.post('/request-password-reset', passwordResetValidation, validateRequest, requestPasswordReset);
+authRouter.post('/request-password-reset', passwordResetValidation, validateRequest, requestPasswordReset);
 
-export default router;
+export default authRouter;

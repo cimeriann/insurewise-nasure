@@ -12,7 +12,7 @@ import { errorHandler } from '@/middleware/errorHandler';
 import { notFoundHandler } from '@/middleware/notFoundHandler';
 
 // Import routes
-import authRoutes from '@/routes/auth.routes';
+import authRouter from '@/routes/auth.routes';
 import userRoutes from '@/routes/user.routes';
 import walletRoutes from '@/routes/wallet.routes';
 import claimRoutes from '@/routes/claim.routes';
@@ -69,7 +69,7 @@ app.get('/health', (req, res) => {
 // API Routes
 const apiRouter = express.Router();
 
-apiRouter.use('/auth', authRoutes);
+apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', userRoutes);
 apiRouter.use('/wallet', walletRoutes);
 apiRouter.use('/claims', claimRoutes);
