@@ -3,7 +3,7 @@ import { IUser } from '@/types';
 import { ITransaction } from '@/types';
 
 export interface IGroupMember {
-  user: mongoose.Types.ObjectId | User;
+  user: mongoose.Types.ObjectId | IUser;
   position: number; // Position in the rotation
   joinedAt: Date;
   isActive: boolean;
@@ -13,7 +13,7 @@ export interface IGroupMember {
 }
 
 export interface IContribution {
-  member: mongoose.Types.ObjectId | User;
+  member: mongoose.Types.ObjectId | IUser;
   amount: number;
   dueDate: Date;
   paidDate?: Date;
@@ -25,14 +25,14 @@ export interface IContribution {
 export interface IGroupSavings extends Document {
   name: string;
   description?: string;
-  creator: mongoose.Types.ObjectId | User;
+  creator: mongoose.Types.ObjectId | IUser;
   members: IGroupMember[];
   contributionAmount: number;
   frequency: 'weekly' | 'monthly';
   startDate: Date;
   endDate: Date;
   currentCycle: number;
-  currentRecipient?: mongoose.Types.ObjectId | User;
+  currentRecipient?: mongoose.Types.ObjectId | IUser;
   status: 'draft' | 'active' | 'completed' | 'cancelled';
   maxMembers: number;
   contributions: IContribution[];
