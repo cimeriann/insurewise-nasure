@@ -8,6 +8,7 @@ import { logger } from '@/config/logger';
  * Middleware to authenticate JWT tokens
  */
 
+
 const { sign } = jwt;
 export const authenticateToken = async (
   req: AuthenticatedRequest,

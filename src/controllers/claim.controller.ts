@@ -235,6 +235,7 @@
 			return next(new AppError('Claim cannot be approved', 400));
 		}
 		await claim.approve(req.user.id, approvedAmount, notes);
+		
 		break;
 
 		case 'declined':

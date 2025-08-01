@@ -6,7 +6,7 @@ import { Transaction } from '@/models/Transaction';
 import { logger } from '@/config/logger';
 import { AuthenticatedRequest } from '@/types';
 import { Types } from 'mongoose';
-import SavingsPlan from '@/models/SavingsPlan';
+import SavingsPlan from '@/models/InsurancePlan';
 
 
 /**

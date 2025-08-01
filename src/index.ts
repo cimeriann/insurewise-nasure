@@ -18,6 +18,7 @@ import walletRoutes from '@/routes/wallet.routes';
 import claimRoutes from '@/routes/claim.routes';
 import groupRoutes from '@/routes/group.routes';
 import paymentRoutes from '@/routes/payment.routes';
+import healthInsuranceSubscriptionRoutes from '@/routes/healthInsuranceSubscription.routes';
 
 // Load environment variables
 dotenv.config();
@@ -70,11 +71,13 @@ app.get('/health', (req, res) => {
 // const apiRouter = express.Router();
 
 app.use(`${API_PREFIX}/${API_VERSION}/auth`, authRouter);
-app.use('/users', userRoutes);
-app.use('/wallet', walletRoutes);
-app.use('/claims', claimRoutes);
-app.use('/groups', groupRoutes);
-app.use('/payments', paymentRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/users`, userRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/insurance-subscriptions`, healthInsuranceSubscriptionRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/wallet`, walletRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/claims`, claimRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/groups`, groupRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/payments`, paymentRoutes);
+
 
 // app.use(`${API_PREFIX}/${API_VERSION}`, apiRouter);
 

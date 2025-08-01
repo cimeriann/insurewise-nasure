@@ -84,7 +84,7 @@ router.get('/profile', authenticateToken, getUserProfile);
  * @desc    Update current user profile
  * @access  Private
  */
-router.put('/profile', authenticateToken, updateProfileValidation, validateRequest, updateUserProfile);
+router.put('/profile', authenticateToken, updateProfileValidation, updateUserProfile);
 
 /**
  * @route   PUT /api/v1/users/profile-picture
@@ -112,7 +112,7 @@ router.delete('/deactivate', authenticateToken, deactivateAccount);
  * @desc    Get user by ID
  * @access  Private (Admin or Owner)
  */
-router.get('/:userId', authenticateToken, userIdValidation, validateRequest, requireOwnershipOrAdmin('userId'), getUserById);
+router.get('/:userId', authenticateToken, userIdValidation, requireOwnershipOrAdmin('userId'), getUserById);
 
 // Admin-only routes
 
