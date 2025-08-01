@@ -6,6 +6,9 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
 import { connectDatabase } from '@/config/database';
 import { logger } from '@/config/logger';
 import { errorHandler } from '@/middleware/errorHandler';
@@ -27,6 +30,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const API_PREFIX = process.env.API_PREFIX || '/api';
 const API_VERSION = process.env.API_VERSION || 'v1';
+
 
 // Rate limiting
 const limiter = rateLimit({
@@ -69,6 +73,18 @@ app.get('/health', (req, res) => {
 
 // API Routes
 // const apiRouter = express.Router();
+const swaggerSpec = swaggerJsdoc({
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'InsureWise API',
+      version: '1.0.0',
+    },
+  },
+  apis: ['./src/routes/*.ts', './src/models/*.ts'], // adjust paths as needed
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(`${API_PREFIX}/${API_VERSION}/auth`, authRouter);
 app.use(`${API_PREFIX}/${API_VERSION}/users`, userRoutes);

@@ -73,60 +73,197 @@ const paginationValidation = [
 // Routes
 
 /**
- * @route   GET /api/v1/users/profile
- * @desc    Get current user profile
- * @access  Private
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management and profile operations
+ */
+
+/**
+ * @swagger
+ * /api/v1/users/profile:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user profile
  */
 router.get('/profile', authenticateToken, getUserProfile);
 
+
 /**
- * @route   PUT /api/v1/users/profile
- * @desc    Update current user profile
- * @access  Private
+ * @swagger
+ * /api/v1/users/profile:
+ *   put:
+ *     summary: Update current user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               dateOfBirth:
+ *                 type: string
+ *                 format: date
+ *               address:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
  */
 router.put('/profile', authenticateToken, updateProfileValidation, updateUserProfile);
 
+
+
 /**
- * @route   PUT /api/v1/users/profile-picture
- * @desc    Update user profile picture
- * @access  Private
+ * @swagger
+ * /api/v1/users/profile-picture:
+ *   put:
+ *     summary: Update user profile picture
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               imageUrl:
+ *                 type: string
+ *                 format: uri
+ *     responses:
+ *       200:
+ *         description: Profile picture updated
  */
 router.put('/profile-picture', authenticateToken, updateProfilePicture);
 
-/**
- * @route   GET /api/v1/users/savings-plans
- * @desc    Get user's savings plans
- * @access  Private
- */
-router.get('/savings-plans', authenticateToken, getUserSavingsPlans);
+
 
 /**
- * @route   DELETE /api/v1/users/deactivate
- * @desc    Deactivate user account
- * @access  Private
+ * @swagger
+ * /api/v1/users/savings-plans:
+ *   get:
+ *     summary: Get user's savings plans
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of savings plans
+ */
+
+router.get('/savings-plans', authenticateToken, getUserSavingsPlans);
+
+
+/**
+ * @swagger
+ * /api/v1/users/deactivate:
+ *   delete:
+ *     summary: Deactivate user account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deactivated
  */
 router.delete('/deactivate', authenticateToken, deactivateAccount);
 
+
 /**
- * @route   GET /api/v1/users/:userId
- * @desc    Get user by ID
- * @access  Private (Admin or Owner)
+ * @swagger
+ * /api/v1/users/{userId}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: userId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ID of the user
+ *     responses:
+ *       200:
+ *         description: User data retrieved
  */
+
 router.get('/:userId', authenticateToken, userIdValidation, requireOwnershipOrAdmin('userId'), getUserById);
 
 // Admin-only routes
 
 /**
- * @route   GET /api/v1/users
- * @desc    Get all users (Admin only)
- * @access  Private (Admin)
+ * @swagger
+ * /api/v1/users:
+ *   get:
+ *     summary: Get all users (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Paginated list of users
  */
 router.get('/', authenticateToken, requireAdmin, paginationValidation, validateRequest, getAllUsers);
 
+
 /**
- * @route   PUT /api/v1/users/:userId/role
- * @desc    Update user role (Admin only)
- * @access  Private (Admin)
+ * @swagger
+ * /api/v1/users/{userId}/role:
+ *   put:
+ *     summary: Update user role (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: userId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *     responses:
+ *       200:
+ *         description: User role updated
  */
 router.put('/:userId/role', authenticateToken, requireAdmin, userIdValidation, roleUpdateValidation, validateRequest, updateUserRole);
 

@@ -89,68 +89,210 @@ const paginationValidation = [
     .withMessage('Invalid status'),
 ];
 
-// Routes
+
 
 /**
- * @route   GET /api/v1/groups/available
- * @desc    Get available groups to join
- * @access  Private
+ * @swagger
+ * tags:
+ *   name: GroupSavings
+ *   description: Group savings endpoints
+ */
+
+/**
+ * @swagger
+ * /api/v1/groups/available:
+ *   get:
+ *     summary: Get available group savings to join
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of available groups
  */
 router.get('/available', authenticateToken, paginationValidation, validateRequest, getAvailableGroups);
 
 /**
- * @route   GET /api/v1/groups/statistics
- * @desc    Get user's group savings statistics
- * @access  Private
+ * @swagger
+ * /api/v1/groups/statistics:
+ *   get:
+ *     summary: Get group savings statistics for a user
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved
  */
 router.get('/statistics', authenticateToken, getGroupSavingsStatistics);
 
 /**
- * @route   GET /api/v1/groups
- * @desc    Get user's group savings
- * @access  Private
+ * @swagger
+ * /api/v1/groups:
+ *   get:
+ *     summary: Get user's group savings
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user's group savings
  */
 router.get('/', authenticateToken, paginationValidation, validateRequest, getUserGroupSavings);
 
 /**
- * @route   POST /api/v1/groups
- * @desc    Create new group savings
- * @access  Private
+ * @swagger
+ * /api/v1/groups:
+ *   post:
+ *     summary: Create a new group savings
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, contributionAmount, frequency, startDate, maxMembers]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               contributionAmount:
+ *                 type: number
+ *               frequency:
+ *                 type: string
+ *                 enum: [weekly, monthly]
+ *               startDate:
+ *                 type: string
+ *                 format: date
+ *               maxMembers:
+ *                 type: integer
+ *               rules:
+ *                 type: object
+ *                 properties:
+ *                   allowEarlyWithdrawal:
+ *                     type: boolean
+ *                   penaltyAmount:
+ *                     type: number
+ *                   minimumContributions:
+ *                     type: integer
+ *                   autoKickInactive:
+ *                     type: boolean
+ *     responses:
+ *       201:
+ *         description: Group created successfully
  */
 router.post('/', authenticateToken, createGroupValidation, validateRequest, createGroupSavings);
 
 /**
- * @route   GET /api/v1/groups/:groupId
- * @desc    Get group savings details
- * @access  Private
+ * @swagger
+ * /api/v1/groups/{groupId}:
+ *   get:
+ *     summary: Get details of a group savings
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Group details retrieved
  */
 router.get('/:groupId', authenticateToken, groupIdValidation, validateRequest, getGroupSavingsById);
 
 /**
- * @route   POST /api/v1/groups/:groupId/join
- * @desc    Join a group savings
- * @access  Private
+ * @swagger
+ * /api/v1/groups/{groupId}/join:
+ *   post:
+ *     summary: Join a group savings
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Joined group successfully
  */
 router.post('/:groupId/join', authenticateToken, groupIdValidation, validateRequest, joinGroupSavings);
 
 /**
- * @route   POST /api/v1/groups/:groupId/leave
- * @desc    Leave a group savings
- * @access  Private
+ * @swagger
+ * /api/v1/groups/{groupId}/leave:
+ *   post:
+ *     summary: Leave a group savings
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Left group successfully
  */
 router.post('/:groupId/leave', authenticateToken, groupIdValidation, validateRequest, leaveGroupSavings);
 
 /**
- * @route   POST /api/v1/groups/:groupId/contribute
- * @desc    Make a contribution to group savings
- * @access  Private
+ * @swagger
+ * /api/v1/groups/{groupId}/contribute:
+ *   post:
+ *     summary: Make a contribution to a group
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Contribution successful
  */
 router.post('/:groupId/contribute', authenticateToken, groupIdValidation, validateRequest, makeContribution);
 
 /**
- * @route   POST /api/v1/groups/:groupId/start
- * @desc    Start a group savings (Creator only)
- * @access  Private
+ * @swagger
+ * /api/v1/groups/{groupId}/start:
+ *   post:
+ *     summary: Start a group savings
+ *     tags: [GroupSavings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Group started successfully
  */
 router.post('/:groupId/start', authenticateToken, groupIdValidation, validateRequest, startGroupSavings);
 

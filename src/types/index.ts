@@ -16,7 +16,7 @@ export interface IUser {
   isActive: boolean;
   role: 'user' | 'admin';
   profilePicture?: string;
-  savingsPlans: Types.ObjectId[];
+  healthInsurancePlans: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
