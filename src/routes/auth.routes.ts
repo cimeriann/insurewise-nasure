@@ -87,21 +87,21 @@ const refreshTokenValidation = [
  * @desc    Register a new user
  * @access  Public
  */
-authRouter.post('/register', registerValidation, validateRequest, register);
+authRouter.post('/register', register);
 
 /**
  * @route   POST /api/v1/auth/login
  * @desc    Login user
  * @access  Public
  */
-authRouter.post('/login', loginValidation, validateRequest, login);
+authRouter.post('/login', loginValidation, login);
 
 /**
  * @route   POST /api/v1/auth/refresh
  * @desc    Refresh access token
  * @access  Public (with valid refresh token)
  */
-authRouter.post('/refresh', refreshTokenValidation, validateRequest, verifyRefreshToken, refreshToken);
+authRouter.post('/refresh', refreshTokenValidation, verifyRefreshToken, refreshToken);
 
 /**
  * @route   POST /api/v1/auth/logout
@@ -122,13 +122,13 @@ authRouter.get('/me', authenticateToken, getCurrentUser);
  * @desc    Change user password
  * @access  Private
  */
-authRouter.put('/change-password', authenticateToken, changePasswordValidation, validateRequest, changePassword);
+authRouter.put('/change-password', authenticateToken, changePasswordValidation, changePassword);
 
 /**
  * @route   POST /api/v1/auth/request-password-reset
  * @desc    Request password reset
  * @access  Public
- */
-authRouter.post('/request-password-reset', passwordResetValidation, validateRequest, requestPasswordReset);
+ */  
+authRouter.post('/request-password-reset', passwordResetValidation, requestPasswordReset);
 
 export default authRouter;
