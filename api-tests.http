@@ -2,10 +2,16 @@
 @baseUrl = http://localhost:3000/api/v1
 @userToken = 
 @adminToken = 
+@refreshToken = 
+@groupId = 
+@claimId = 
+@planId = 
+@subscriptionId = 
 
-### ================================
-### AUTHENTICATION ENDPOINTS
-### ================================
+### Health Check
+GET {{baseUrl}}/../health
+
+### === AUTHENTICATION ENDPOINTS ===
 
 ### 1. Register New User
 POST {{baseUrl}}/auth/register
@@ -16,12 +22,12 @@ Content-Type: application/json
   "password": "password123",
   "firstName": "Test",
   "lastName": "User",
-  "phoneNumber": "+2348099999999",
+  "phoneNumber": "+2348055555555",
   "dateOfBirth": "1995-06-15",
-  "address": "123 Test Street, Lagos"
+  "address": "123 Test Street, Lagos, Nigeria"
 }
 
-### 2. Login with Demo User
+### 2. Login User (Seeded User)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -30,7 +36,7 @@ Content-Type: application/json
   "password": "password123"
 }
 
-### 3. Login with Admin User
+### 3. Login Admin (Seeded Admin)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -39,7 +45,7 @@ Content-Type: application/json
   "password": "password123"
 }
 
-### 4. Get Current User Profile
+### 4. Get Current User
 GET {{baseUrl}}/auth/me
 Authorization: Bearer {{userToken}}
 
@@ -48,38 +54,11 @@ POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 
 {
-  "refreshToken": "your_refresh_token_here"
+  "refreshToken": "{{refreshToken}}"
 }
 
-### 6. Logout
-POST {{baseUrl}}/auth/logout
-Authorization: Bearer {{userToken}}
-
-### ================================
-### USER ENDPOINTS
-### ================================
-
-### 7. Get All Users (Admin Only)
-GET {{baseUrl}}/users
-Authorization: Bearer {{adminToken}}
-
-### 8. Get User by ID
-GET {{baseUrl}}/users/user_id_here
-Authorization: Bearer {{userToken}}
-
-### 9. Update User Profile
-PUT {{baseUrl}}/users/user_id_here
-Authorization: Bearer {{userToken}}
-Content-Type: application/json
-
-{
-  "firstName": "Updated",
-  "lastName": "Name",
-  "address": "Updated address"
-}
-
-### 10. Change Password
-PUT {{baseUrl}}/users/user_id_here/password
+### 6. Change Password
+PUT {{baseUrl}}/auth/change-password
 Authorization: Bearer {{userToken}}
 Content-Type: application/json
 
@@ -88,174 +67,442 @@ Content-Type: application/json
   "newPassword": "newpassword123"
 }
 
-### ================================
-### WALLET ENDPOINTS
-### ================================
+### 7. Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{userToken}}
 
-### 11. Get User Wallet
+### === USER MANAGEMENT ENDPOINTS ===
+
+### 8. Get All Users (Admin Only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{adminToken}}
+
+### 9. Get User Profile
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{userToken}}
+
+### 10. Update User Profile
+PUT {{baseUrl}}/users/profile
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Updated",
+  "lastName": "Name",
+  "phoneNumber": "+2348066666666",
+  "address": "456 Updated Street, Abuja, Nigeria"
+}
+
+### === WALLET ENDPOINTS ===
+
+### 11. Get Wallet
 GET {{baseUrl}}/wallet
 Authorization: Bearer {{userToken}}
 
-### 12. Fund Wallet (Mock Paystack)
+### 12. Get Wallet Balance
+GET {{baseUrl}}/wallet/balance
+Authorization: Bearer {{userToken}}
+
+### 13. Fund Wallet
 POST {{baseUrl}}/wallet/fund
-Authorization: Bearer {{userToken}}
-Content-Type: application/json
-
-{
-  "amount": 25000,
-  "currency": "NGN",
-  "paymentMethod": "paystack"
-}
-
-### 13. Get Wallet Transactions
-GET {{baseUrl}}/wallet/transactions?page=1&limit=10
-Authorization: Bearer {{userToken}}
-
-### 14. Get Transaction by ID
-GET {{baseUrl}}/wallet/transactions/transaction_id_here
-Authorization: Bearer {{userToken}}
-
-### ================================
-### CLAIMS ENDPOINTS
-### ================================
-
-### 15. Submit New Claim
-POST {{baseUrl}}/claims
-Authorization: Bearer {{userToken}}
-Content-Type: application/json
-
-{
-  "type": "medical",
-  "title": "Medical Expense Claim",
-  "description": "Hospital bill for emergency treatment",
-  "amount": 75000,
-  "currency": "NGN",
-  "receiptUrl": "https://example.com/receipt.pdf"
-}
-
-### 16. Get User's Claims
-GET {{baseUrl}}/claims?page=1&limit=10&status=pending
-Authorization: Bearer {{userToken}}
-
-### 17. Get Claim by ID
-GET {{baseUrl}}/claims/claim_id_here
-Authorization: Bearer {{userToken}}
-
-### 18. Get All Claims (Admin Only)
-GET {{baseUrl}}/claims/admin/all?page=1&limit=20
-Authorization: Bearer {{adminToken}}
-
-### 19. Update Claim Status (Admin Only)
-PUT {{baseUrl}}/claims/claim_id_here/status
-Authorization: Bearer {{adminToken}}
-Content-Type: application/json
-
-{
-  "status": "approved",
-  "reviewNotes": "Claim approved after document verification",
-  "approvedAmount": 70000
-}
-
-### ================================
-### GROUP SAVINGS ENDPOINTS
-### ================================
-
-### 20. Create New Group
-POST {{baseUrl}}/groups
-Authorization: Bearer {{userToken}}
-Content-Type: application/json
-
-{
-  "name": "Test Savings Group",
-  "description": "A test group for API testing",
-  "contributionAmount": 30000,
-  "currency": "NGN",
-  "maxMembers": 6,
-  "contributionFrequency": "monthly",
-  "totalCycles": 6
-}
-
-### 21. Get All Groups
-GET {{baseUrl}}/groups?page=1&limit=10&status=active
-Authorization: Bearer {{userToken}}
-
-### 22. Get Group by ID
-GET {{baseUrl}}/groups/group_id_here
-Authorization: Bearer {{userToken}}
-
-### 23. Join Group
-POST {{baseUrl}}/groups/group_id_here/join
-Authorization: Bearer {{userToken}}
-
-### 24. Leave Group
-POST {{baseUrl}}/groups/group_id_here/leave
-Authorization: Bearer {{userToken}}
-
-### 25. Make Contribution
-POST {{baseUrl}}/groups/group_id_here/contribute
-Authorization: Bearer {{userToken}}
-Content-Type: application/json
-
-{
-  "amount": 30000
-}
-
-### 26. Get Group Contributions
-GET {{baseUrl}}/groups/group_id_here/contributions
-Authorization: Bearer {{userToken}}
-
-### 27. Update Group (Creator Only)
-PUT {{baseUrl}}/groups/group_id_here
-Authorization: Bearer {{userToken}}
-Content-Type: application/json
-
-{
-  "description": "Updated group description",
-  "status": "active"
-}
-
-### ================================
-### PAYMENT ENDPOINTS
-### ================================
-
-### 28. Initialize Payment
-POST {{baseUrl}}/payments/initialize
 Authorization: Bearer {{userToken}}
 Content-Type: application/json
 
 {
   "amount": 50000,
   "currency": "NGN",
-  "purpose": "wallet_funding",
-  "metadata": {
-    "userId": "user_id_here"
+  "paymentMethod": "paystack"
+}
+
+### 14. Withdraw from Wallet
+POST {{baseUrl}}/wallet/withdraw
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 10000,
+  "currency": "NGN",
+  "bankAccount": {
+    "accountNumber": "1234567890",
+    "bankCode": "044",
+    "accountName": "Test User"
   }
 }
 
-### 29. Verify Payment
-GET {{baseUrl}}/payments/verify/payment_reference_here
+### 15. Get Transaction History
+GET {{baseUrl}}/wallet/transactions?page=1&limit=10
 Authorization: Bearer {{userToken}}
 
-### 30. Get Payment History
-GET {{baseUrl}}/payments/history?page=1&limit=10
+### === CLAIMS ENDPOINTS ===
+
+### 16. Submit New Claim
+POST {{baseUrl}}/claims
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "type": "medical",
+  "title": "Emergency Hospital Treatment",
+  "description": "Emergency treatment at Lagos University Teaching Hospital for acute appendicitis",
+  "amount": 125000,
+  "currency": "NGN",
+  "receiptUrl": "https://example.com/receipts/receipt_001.pdf",
+  "documents": [
+    "https://example.com/docs/medical_report.pdf",
+    "https://example.com/docs/discharge_summary.pdf"
+  ]
+}
+
+### 17. Get User Claims
+GET {{baseUrl}}/claims?status=pending&page=1&limit=10
 Authorization: Bearer {{userToken}}
 
-### ================================
-### ADMIN-ONLY ENDPOINTS
-### ================================
+### 18. Get Specific Claim
+GET {{baseUrl}}/claims/{{claimId}}
+Authorization: Bearer {{userToken}}
 
-### 31. Get Dashboard Stats (Admin)
-GET {{baseUrl}}/admin/dashboard
+### 19. Get All Claims (Admin)
+GET {{baseUrl}}/claims/admin/all?page=1&limit=20
 Authorization: Bearer {{adminToken}}
 
-### 32. Get All Users (Admin)
-GET {{baseUrl}}/admin/users?page=1&limit=20
+### 20. Get Pending Claims (Admin)
+GET {{baseUrl}}/claims/admin/pending
 Authorization: Bearer {{adminToken}}
 
-### 33. Deactivate User (Admin)
-PUT {{baseUrl}}/admin/users/user_id_here/deactivate
+### 21. Get Claim Statistics (Admin)
+GET {{baseUrl}}/claims/admin/stats
 Authorization: Bearer {{adminToken}}
 
-### 34. Get Pending Claims (Admin)
-GET {{baseUrl}}/admin/claims/pending
+### 22. Review Claim (Admin)
+PUT {{baseUrl}}/claims/admin/{{claimId}}/review
 Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "under_review",
+  "notes": "Claim is being reviewed for medical necessity and documentation completeness"
+}
+
+### 23. Approve Claim (Admin)
+PUT {{baseUrl}}/claims/admin/{{claimId}}/approve
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "approvedAmount": 120000,
+  "notes": "Claim approved. Amount reduced due to policy limit on emergency procedures."
+}
+
+### 24. Decline Claim (Admin)
+PUT {{baseUrl}}/claims/admin/{{claimId}}/decline
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "notes": "Claim declined due to incomplete documentation. Please resubmit with required medical reports."
+}
+
+### === GROUP SAVINGS ENDPOINTS ===
+
+### 25. Create New Group
+POST {{baseUrl}}/group-savings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "name": "Tech Workers Monthly Savings",
+  "description": "Monthly savings group for tech professionals in Lagos",
+  "contributionAmount": 30000,
+  "currency": "NGN",
+  "maxMembers": 10,
+  "frequency": "monthly",
+  "totalCycles": 10
+}
+
+### 26. Get All Groups
+GET {{baseUrl}}/group-savings?status=active&page=1&limit=10
+Authorization: Bearer {{userToken}}
+
+### 27. Get User's Groups
+GET {{baseUrl}}/group-savings/my-groups
+Authorization: Bearer {{userToken}}
+
+### 28. Get Specific Group
+GET {{baseUrl}}/group-savings/{{groupId}}
+Authorization: Bearer {{userToken}}
+
+### 29. Join Group
+POST {{baseUrl}}/group-savings/{{groupId}}/join
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{}
+
+### 30. Make Contribution
+POST {{baseUrl}}/group-savings/{{groupId}}/contribute
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 30000,
+  "cycle": 1
+}
+
+### 31. Get Group Members
+GET {{baseUrl}}/group-savings/{{groupId}}/members
+Authorization: Bearer {{userToken}}
+
+### 32. Get Group Contributions
+GET {{baseUrl}}/group-savings/{{groupId}}/contributions
+Authorization: Bearer {{userToken}}
+
+### 33. Start Group (Creator Only)
+PUT {{baseUrl}}/group-savings/{{groupId}}/start
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{}
+
+### === PAYMENT ENDPOINTS ===
+
+### 34. Initialize Payment
+POST {{baseUrl}}/payments/initialize
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 25000,
+  "currency": "NGN",
+  "purpose": "wallet_funding",
+  "paymentMethod": "paystack"
+}
+
+### 35. Verify Payment
+POST {{baseUrl}}/payments/verify
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "reference": "WF_1699876543_abc123def"
+}
+
+### 36. Get Payment History
+GET {{baseUrl}}/payments/history?status=successful&page=1&limit=10
+Authorization: Bearer {{userToken}}
+
+### 37. Get Payment Statistics (Admin)
+GET {{baseUrl}}/payments/admin/stats
+Authorization: Bearer {{adminToken}}
+
+### 38. Initialize Group Contribution Payment
+POST {{baseUrl}}/payments/group-contribution
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "groupId": "{{groupId}}",
+  "amount": 30000,
+  "currency": "NGN"
+}
+
+### === INSURANCE PLAN ENDPOINTS ===
+
+### 39. Get All Insurance Plans
+GET {{baseUrl}}/insurance-plans
+
+### 40. Get Specific Insurance Plan
+GET {{baseUrl}}/insurance-plans/{{planId}}
+
+### 41. Create Insurance Plan (Admin)
+POST {{baseUrl}}/insurance-plans
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Premium Health Plan",
+  "tier": "premium",
+  "coverage": {
+    "hospitalization": true,
+    "outpatient": true,
+    "dental": true,
+    "optical": true,
+    "maternity": true,
+    "preExistingConditions": true
+  },
+  "premium": {
+    "monthly": 25000,
+    "quarterly": 70000,
+    "yearly": 250000
+  },
+  "maxCoverageAmount": 10000000,
+  "waitingPeriod": 30,
+  "description": "Comprehensive health insurance with full coverage including pre-existing conditions"
+}
+
+### 42. Update Insurance Plan (Admin)
+PUT {{baseUrl}}/insurance-plans/{{planId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "premium": {
+    "monthly": 28000,
+    "quarterly": 78000,
+    "yearly": 280000
+  },
+  "description": "Updated comprehensive health insurance with enhanced coverage"
+}
+
+### 43. Delete Insurance Plan (Admin)
+DELETE {{baseUrl}}/insurance-plans/{{planId}}
+Authorization: Bearer {{adminToken}}
+
+### === INSURANCE SUBSCRIPTION ENDPOINTS ===
+
+### 44. Subscribe to Insurance Plan
+POST {{baseUrl}}/insurance-subscriptions
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "planId": "{{planId}}",
+  "paymentFrequency": "monthly",
+  "beneficiaries": [
+    {
+      "name": "Jane Doe",
+      "relationship": "spouse",
+      "dateOfBirth": "1992-03-15",
+      "phoneNumber": "+2348077777777"
+    },
+    {
+      "name": "John Doe Jr",
+      "relationship": "child",
+      "dateOfBirth": "2015-08-20"
+    }
+  ],
+  "emergencyContact": {
+    "name": "Dr. Smith Johnson",
+    "phoneNumber": "+2348088888888",
+    "relationship": "family_doctor"
+  },
+  "medicalHistory": {
+    "conditions": ["hypertension"],
+    "medications": ["lisinopril"],
+    "allergies": ["penicillin"]
+  }
+}
+
+### 45. Get User Subscriptions
+GET {{baseUrl}}/insurance-subscriptions
+Authorization: Bearer {{userToken}}
+
+### 46. Get Specific Subscription
+GET {{baseUrl}}/insurance-subscriptions/{{subscriptionId}}
+Authorization: Bearer {{userToken}}
+
+### 47. Update Subscription
+PUT {{baseUrl}}/insurance-subscriptions/{{subscriptionId}}
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "emergencyContact": {
+    "name": "Dr. Updated Contact",
+    "phoneNumber": "+2348099999999",
+    "relationship": "family_doctor"
+  }
+}
+
+### 48. Cancel Subscription
+POST {{baseUrl}}/insurance-subscriptions/{{subscriptionId}}/cancel
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "reason": "Moving to different insurance provider"
+}
+
+### === ERROR TESTING ===
+
+### 49. Test Invalid Token
+GET {{baseUrl}}/auth/me
+Authorization: Bearer invalid_token_here
+
+### 50. Test Missing Required Fields
+POST {{baseUrl}}/claims
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "type": "medical"
+}
+
+### 51. Test Admin Only Endpoint with User Token
+GET {{baseUrl}}/claims/admin/all
+Authorization: Bearer {{userToken}}
+
+### 52. Test Unauthorized Access
+GET {{baseUrl}}/wallet
+
+### 53. Test Invalid Group Join
+POST {{baseUrl}}/group-savings/invalid_group_id/join
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{}
+
+### === EDGE CASES ===
+
+### 54. Test Large Amount Transaction
+POST {{baseUrl}}/wallet/fund
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 10000000,
+  "currency": "NGN",
+  "paymentMethod": "paystack"
+}
+
+### 55. Test Invalid Currency
+POST {{baseUrl}}/wallet/fund
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "amount": 50000,
+  "currency": "USD",
+  "paymentMethod": "paystack"
+}
+
+### 56. Test Negative Amount
+POST {{baseUrl}}/claims
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "type": "medical",
+  "title": "Test Claim",
+  "description": "Test description",
+  "amount": -1000,
+  "currency": "NGN"
+}
+
+### 57. Test Pagination Edge Cases
+GET {{baseUrl}}/claims?page=999&limit=1000
+Authorization: Bearer {{userToken}}
+
+### 58. Test Special Characters in Names
+POST {{baseUrl}}/group-savings
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Group with Special Chars !@#$%",
+  "description": "Testing special characters in group name",
+  "contributionAmount": 10000,
+  "currency": "NGN",
+  "maxMembers": 5,
+  "frequency": "monthly",
+  "totalCycles": 5
+}

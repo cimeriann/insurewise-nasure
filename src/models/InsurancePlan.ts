@@ -1,7 +1,8 @@
 // models/HealthInsurancePlan.model.ts
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IHealthInsurancePlan extends Document {
+  _id: Types.ObjectId;
   name: string;
   tier: 'basic' | 'standard' | 'premium';
   coverage: {
@@ -21,10 +22,17 @@ export interface IHealthInsurancePlan extends Document {
   waitingPeriod: number; // in days
   description: string;
   isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const HealthInsurancePlanSchema = new Schema<IHealthInsurancePlan>({
-  name: { type: String, required: true },
+  name: { 
+    type: String, 
+    required: true,
+    trim: true,
+    maxlength: 100
+  },
   tier: { 
     type: String, 
     enum: ['basic', 'standard', 'premium'],
@@ -39,17 +47,53 @@ const HealthInsurancePlanSchema = new Schema<IHealthInsurancePlan>({
     preExistingConditions: { type: Boolean, default: false }
   },
   premium: {
-    monthly: { type: Number, required: true },
-    quarterly: { type: Number, required: true },
-    yearly: { type: Number, required: true }
+    monthly: { type: Number, required: true, min: 0 },
+    quarterly: { type: Number, required: true, min: 0 },
+    yearly: { type: Number, required: true, min: 0 }
   },
-  maxCoverageAmount: { type: Number, required: true },
-  waitingPeriod: { type: Number, default: 30 }, // 30 days default
-  description: { type: String, required: true },
-  isActive: { type: Boolean, default: true }
-}, { timestamps: true });
+  maxCoverageAmount: { 
+    type: Number, 
+    required: true,
+    min: 0
+  },
+  waitingPeriod: { 
+    type: Number, 
+    default: 30,
+    min: 0
+  },
+  description: { 
+    type: String, 
+    required: true,
+    trim: true,
+    maxlength: 1000
+  },
+  isActive: { 
+    type: Boolean, 
+    default: true 
+  }
+}, { 
+  timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      const { __v, ...rest } = ret;
+      return rest;
+    },
+  }
+});
+
+// Indexes
+HealthInsurancePlanSchema.index({ tier: 1 });
+HealthInsurancePlanSchema.index({ isActive: 1 });
+HealthInsurancePlanSchema.index({ 'premium.monthly': 1 });
+
+// Virtual for coverage count
+HealthInsurancePlanSchema.virtual('coverageCount').get(function() {
+  return Object.values(this.coverage).filter(Boolean).length;
+});
 
 export const HealthInsurancePlan = mongoose.model<IHealthInsurancePlan>(
   'HealthInsurancePlan', 
   HealthInsurancePlanSchema
 );
+
+export default HealthInsurancePlan;

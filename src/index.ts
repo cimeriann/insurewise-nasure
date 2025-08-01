@@ -23,6 +23,17 @@ import groupRoutes from '@/routes/group.routes';
 import paymentRoutes from '@/routes/payment.routes';
 import healthInsuranceSubscriptionRoutes from '@/routes/healthInsuranceSubscription.routes';
 
+// Import models to register them with Mongoose
+import '@/models/User';
+import '@/models/Wallet';
+import '@/models/Transaction';
+import '@/models/GroupSavings';
+import '@/models/SavingsPlan';
+import '@/models/InsurancePlan';
+// Note: You'll need to create these new model files:
+// import '@/models/HealthInsuranceSubscription';
+// import '@/models/InsuranceClaim';
+
 // Load environment variables
 dotenv.config();
 
@@ -91,7 +102,7 @@ app.use(`${API_PREFIX}/${API_VERSION}/users`, userRoutes);
 app.use(`${API_PREFIX}/${API_VERSION}/insurance-subscriptions`, healthInsuranceSubscriptionRoutes);
 app.use(`${API_PREFIX}/${API_VERSION}/wallet`, walletRoutes);
 app.use(`${API_PREFIX}/${API_VERSION}/claims`, claimRoutes);
-app.use(`${API_PREFIX}/${API_VERSION}/groups`, groupRoutes);
+app.use(`${API_PREFIX}/${API_VERSION}/group-savings`, groupRoutes); // Fixed: changed from /groups to /group-savings
 app.use(`${API_PREFIX}/${API_VERSION}/payments`, paymentRoutes);
 
 
