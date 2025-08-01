@@ -147,6 +147,90 @@ export interface ISavingsPlan {
   updatedAt: Date;
 }
 
+// Insurance related types - NEW STRUCTURE
+export interface IHealthInsurancePlan {
+  _id: Types.ObjectId;
+  name: string;
+  tier: 'basic' | 'standard' | 'premium';
+  coverage: {
+    hospitalization: boolean;
+    outpatient: boolean;
+    dental: boolean;
+    optical: boolean;
+    maternity: boolean;
+    preExistingConditions: boolean;
+  };
+  premium: {
+    monthly: number;
+    quarterly: number;
+    yearly: number;
+  };
+  maxCoverageAmount: number;
+  waitingPeriod: number;
+  description: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IHealthInsuranceSubscription {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  planId: Types.ObjectId;
+  status: 'active' | 'pending' | 'cancelled' | 'expired';
+  paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
+  premiumAmount: number;
+  startDate: Date;
+  endDate: Date;
+  nextPaymentDate: Date;
+  beneficiaries: {
+    name: string;
+    relationship: string;
+    dateOfBirth: Date;
+    phoneNumber?: string;
+  }[];
+  medicalHistory?: {
+    conditions: string[];
+    medications: string[];
+    allergies: string[];
+  };
+  emergencyContact: {
+    name: string;
+    phoneNumber: string;
+    relationship: string;
+  };
+  documents: {
+    type: 'id_card' | 'medical_report' | 'other';
+    url: string;
+    uploadedAt: Date;
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IInsuranceClaim {
+  _id: Types.ObjectId;
+  subscriptionId: Types.ObjectId;
+  userId: Types.ObjectId;
+  claimType: 'hospitalization' | 'outpatient' | 'dental' | 'optical' | 'maternity' | 'emergency';
+  amount: number;
+  status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'paid';
+  dateOfIncident: Date;
+  hospitalName: string;
+  diagnosis: string;
+  description: string;
+  documents: {
+    type: 'receipt' | 'medical_report' | 'prescription' | 'discharge_summary' | 'other';
+    url: string;
+    uploadedAt: Date;
+  }[];
+  reviewNotes?: string;
+  approvedAmount?: number;
+  paymentDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Cashback related types
 export interface ICashback {
   _id: Types.ObjectId;
