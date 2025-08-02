@@ -59,7 +59,7 @@ const limiter = rateLimit({
 app.use(compression()); // Compress responses
 app.use(limiter); // Rate limiting
 app.use(cors({
-  origin: ['https://ilera-pay-fe.vercel.app', 'http://localhost:3000'],
+  origin: ['https://ilera-pay-fe.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
 }));
 
