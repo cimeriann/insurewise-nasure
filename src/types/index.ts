@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import mongoose, { Types } from 'mongoose';
-
+import SavingsPlan from '@/models/SavingsPlan';
 
 // User related types
 export interface IUser {
