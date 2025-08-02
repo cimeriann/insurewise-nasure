@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticatedRequest, JWTPayload } from '@/types';
-import { User } from '@/models/User';
+import User from '@/models/User';
 import { logger } from '@/config/logger';
 
 /**

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { Wallet } from '@/models/Wallet';
 import { Transaction } from '@/models/Transaction';
-import { User } from '@/models/User';
+import User from '@/models/User';
 import { logger } from '@/config/logger';
 import { AuthenticatedRequest } from '@/types';
 import crypto from 'crypto';

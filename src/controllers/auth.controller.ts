@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
-import { User } from "@/models/User";
+import User  from "@/models/User";
 import { Wallet } from "@/models/Wallet";
 import { generateTokens } from "@/middleware/auth";
 import { catchAsync, AppError } from "@/middleware/errorHandler";

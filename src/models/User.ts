@@ -1,19 +1,28 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document, Types, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { IUser } from '@/types';
 
+// 1. Enhanced Document Interface
 export interface IUserDocument extends IUser, Document<Types.ObjectId> {
-  _id: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateDisplayName(): string;
   isPasswordExpired(): boolean;
+  fullName: string;
+  age: number | null;
 }
 
-const userSchema = new Schema<IUserDocument>({
+// 2. Model Static Methods Interface
+interface IUserModel extends Model<IUserDocument> {
+  findByEmail(email: string): Promise<IUserDocument | null>;
+  findActive(): Promise<IUserDocument[]>;
+}
+
+// 3. Schema Definition with Type Assertion
+const userSchemaFields: Record<string, any> = {
   email: {
     type: String,
     required: [true, 'Email is required'],
-    unique: true, // Keep this
+    unique: true,
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'],
@@ -22,7 +31,7 @@ const userSchema = new Schema<IUserDocument>({
     type: String,
     required: [true, 'Password is required'],
     minlength: [8, 'Password must be at least 8 characters long'],
-    select: false, // Don't include password in queries by default
+    select: false,
   },
   firstName: {
     type: String,
@@ -39,16 +48,16 @@ const userSchema = new Schema<IUserDocument>({
   phoneNumber: {
     type: String,
     required: [true, 'Phone number is required'],
-    unique: true, // Keep this
+    unique: true,
     match: [/^\+?[\d\s-()]{10,}$/, 'Please enter a valid phone number'],
   },
   dateOfBirth: {
     type: Date,
     validate: {
-      validator: function(date: Date) {
+      validator: function(this: IUserDocument, date: Date): boolean {
         const today = new Date();
         const age = today.getFullYear() - date.getFullYear();
-        return age >= 18; // Must be at least 18 years old
+        return age >= 18;
       },
       message: 'User must be at least 18 years old',
     },
@@ -79,92 +88,36 @@ const userSchema = new Schema<IUserDocument>({
     type: String,
     default: null,
   },
+  healthInsurancePlans: [{
+    type: Schema.Types.ObjectId,
+    ref: 'HealthInsurancePlan',
+  }],
   savingsPlans: [{
     type: Schema.Types.ObjectId,
     ref: 'SavingsPlan',
   }],
-}, {
+};
+
+const userSchema = new Schema<IUserDocument, IUserModel>(userSchemaFields, {
   timestamps: true,
   toJSON: {
-    transform: function(doc, ret) {
+    virtuals: true,
+    transform: function(doc, ret: Record<string, any>) {
       const { password, __v, ...rest } = ret;
       return rest;
     },
   },
+  toObject: {
+    virtuals: true,
+  },
 });
 
-// Indexes for better query performance
-userSchema.index({ isActive: 1 });
-userSchema.index({ createdAt: -1 });
-
-// Pre-save middleware to hash password
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-
-  try {
-    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
-    this.password = await bcrypt.hash(this.password, saltRounds);
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
-
-// Pre-save middleware to validate email uniqueness case-insensitively
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('email')) return next();
-
-  try {
-    const existingUser = await User.findOne({
-      email: this.email.toLowerCase(),
-      _id: { $ne: this._id },
-    });
-
-    if (existingUser) {
-      const error = new Error('Email already exists') as any;
-      error.code = 11000;
-      return next(error);
-    }
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
-
-// Instance method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-// Instance method to generate display name
-userSchema.methods.generateDisplayName = function(): string {
-  return `${this.firstName} ${this.lastName}`;
-};
-
-// Instance method to check if password needs to be updated
-userSchema.methods.isPasswordExpired = function(): boolean {
-  // Implement password expiry logic if needed
-  // For now, passwords don't expire
-  return false;
-};
-
-// Static method to find by email (case-insensitive)
-userSchema.statics.findByEmail = function(email: string) {
-  return this.findOne({ email: email.toLowerCase() });
-};
-
-// Static method to find active users
-userSchema.statics.findActive = function() {
-  return this.find({ isActive: true });
-};
-
-// Virtual for full name
-userSchema.virtual('fullName').get(function() {
+// 4. Type-safe Virtuals and Methods
+userSchema.virtual('fullName').get(function(this: IUserDocument): string {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Virtual for age calculation
-userSchema.virtual('age').get(function() {
+userSchema.virtual('age').get(function(this: IUserDocument): number | null {
   if (!this.dateOfBirth) return null;
   const today = new Date();
   const birthDate = new Date(this.dateOfBirth);
@@ -174,9 +127,32 @@ userSchema.virtual('age').get(function() {
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     age--;
   }
-  
   return age;
 });
 
-export const User = mongoose.model<IUserDocument>('User', userSchema);
+// 5. Type-safe Pre-save Hooks
+userSchema.pre<IUserDocument>('save', async function(next) {
+  if (!this.isModified('password')) return next();
+
+  try {
+    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, saltRounds);
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
+
+// 6. Type-safe Instance Methods
+userSchema.methods.comparePassword = async function(
+  this: IUserDocument,
+  candidatePassword: string
+): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+// 7. Create and Export Model
+const User = mongoose.model<IUserDocument, IUserModel>('User', userSchema);
 export default User;

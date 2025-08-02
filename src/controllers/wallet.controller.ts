@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { Wallet } from '@/models/Wallet';
 import { Transaction } from '@/models/Transaction';
-import { User } from '@/models/User';
+import User  from '@/models/User';
 import { catchAsync, AppError } from '@/middleware/errorHandler';
 import { logger } from '@/config/logger';
 import { AuthenticatedRequest, ApiResponse, ITransaction } from '@/types';

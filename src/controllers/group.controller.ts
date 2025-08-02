@@ -7,6 +7,7 @@ import { logger } from '@/config/logger';
 import { AuthenticatedRequest } from '@/types';
 import { Types } from 'mongoose';
 import HealthInsurancePlan from '@/models/InsurancePlan';
+import SavingsPlan from '@/models/SavingsPlan';
 
 
 /**
