@@ -58,10 +58,11 @@ const limiter = rateLimit({
 // app.use(helmet()); // Security headers
 app.use(compression()); // Compress responses
 app.use(limiter); // Rate limiting
-// app.use(cors({
-//   origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
-//   credentials: true,
-// }));
+app.use(cors({
+  origin: ['https://ilera-pay-fe.vercel.app', 'http://localhost:3000'],
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
